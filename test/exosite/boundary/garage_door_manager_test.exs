@@ -23,6 +23,15 @@ defmodule Exosite.Boundary.GarageDoorManagerTest do
     assert access_code.code == "abc"
   end
 
+  test "remove_access_code/2 removes an access code" do
+    user = user_fixture()
+
+    GarageDoorManager.new()
+    GarageDoorManager.add_access_code("abc", user)
+    state = GarageDoorManager.remove_access_code("abc", user)
+    assert [] = state.door.access_codes
+  end
+
   defp user_fixture(overrides \\ []) do
     User.new(Keyword.merge([id: "foo", name: "Jane", email: "jane@exosite.com"], overrides))
   end

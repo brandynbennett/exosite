@@ -5,7 +5,7 @@ defmodule Exosite.Core.GarageDoorTest do
   alias Exosite.Core.GarageDoor
   alias Exosite.Core.User
 
-  test "add_access_code/2 Adds new access code" do
+  test "add_access_code/2 adds new access code" do
     user = user_fixture()
 
     %GarageDoor{access_codes: [access_code]} =
@@ -15,7 +15,7 @@ defmodule Exosite.Core.GarageDoorTest do
     assert %AccessCode{user_id: user.id, code: "abc"} == access_code
   end
 
-  test "add_access_code/2 Ignores duplicates" do
+  test "add_access_code/2 ignores duplicates" do
     user = user_fixture()
 
     %GarageDoor{access_codes: [access_code]} =
@@ -24,6 +24,15 @@ defmodule Exosite.Core.GarageDoorTest do
       |> GarageDoor.add_access_code("abc", user)
 
     assert %AccessCode{user_id: user.id, code: "abc"} == access_code
+  end
+
+  test "remove_access_code/2 removes an access code" do
+    user = user_fixture()
+
+    assert %GarageDoor{access_codes: []} =
+             GarageDoor.new()
+             |> GarageDoor.add_access_code("abc", user)
+             |> GarageDoor.remove_access_code("abc", user)
   end
 
   defp user_fixture(overrides \\ []) do

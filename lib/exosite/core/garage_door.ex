@@ -18,4 +18,9 @@ defmodule Exosite.Core.GarageDoor do
 
     Map.put(door, :access_codes, codes)
   end
+
+  def remove_access_code(%__MODULE__{} = door, code, %User{} = user) do
+    codes = List.delete(door.access_codes, AccessCode.new(code: code, user_id: user.id))
+    Map.put(door, :access_codes, codes)
+  end
 end

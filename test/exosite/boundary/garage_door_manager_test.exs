@@ -1,6 +1,7 @@
 defmodule Exosite.Boundary.GarageDoorManagerTest do
   use ExUnit.Case, async: true
 
+  alias Exosite.Core.GarageDoor
   alias Exosite.Boundary.GarageDoorManager
   alias Exosite.Core.User
 
@@ -30,6 +31,18 @@ defmodule Exosite.Boundary.GarageDoorManagerTest do
     GarageDoorManager.add_access_code("abc", user)
     state = GarageDoorManager.remove_access_code("abc", user)
     assert [] = state.door.access_codes
+  end
+
+  test "open/2 opens the door" do
+    user = user_fixture()
+
+    door =
+      GarageDoor.new(state: :closed)
+      |> GarageDoor.add_access_code("abc", user)
+
+    GarageDoorManager.new(door: door)
+    state = GarageDoorManager.open("abc", user)
+    assert state.door.state == :open
   end
 
   defp user_fixture(overrides \\ []) do

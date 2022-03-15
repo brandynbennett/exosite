@@ -1,10 +1,18 @@
 defmodule Exosite.Boundary.GarageDoorManager do
   use GenServer
   alias Exosite.Core.GarageDoor
+  alias Exosite.Core.GarageDoorEvent
   alias Exosite.Boundary.GarageDoorManager.State
 
-  def new(name \\ __MODULE__, events \\ []) do
-    GenServer.start_link(__MODULE__, State.new(events: events), name: name)
+  def new(opts \\ []) do
+    fields =
+      Keyword.put_new(opts, :door, GarageDoor.new())
+      |> Keyword.put_new(:events, [])
+      |> Keyword.delete(:name)
+
+    name = Keyword.get(opts, :name, __MODULE__)
+
+    GenServer.start_link(__MODULE__, State.new(fields), name: name)
   end
 
   def get_state(name \\ __MODULE__) do
@@ -17,6 +25,10 @@ defmodule Exosite.Boundary.GarageDoorManager do
 
   def remove_access_code(name \\ __MODULE__, code, user) do
     GenServer.call(name, {:remove_access_code, code, user})
+  end
+
+  def open(name \\ __MODULE__, code, user, now \\ DateTime.utc_now()) do
+    GenServer.call(name, {:open, code, user, now})
   end
 
   @impl true
@@ -42,6 +54,23 @@ defmodule Exosite.Boundary.GarageDoorManager do
     state = State.update_door(state, door)
     {:reply, state, state}
   end
+
+  @impl true
+  def handle_call({:open, code, user, now}, _from, state) do
+    event =
+      GarageDoorEvent.new(
+        user_id: user.id,
+        access_code: code,
+        created_at: now,
+        door_function: &GarageDoor.open(&1, &2)
+      )
+
+    state =
+      State.add_event(state, event)
+      |> State.aggregate_events()
+
+    {:reply, state, state}
+  end
 end
 
 defmodule Exosite.Boundary.GarageDoorManager.State do
@@ -50,11 +79,26 @@ defmodule Exosite.Boundary.GarageDoorManager.State do
   defstruct door: nil, events: []
 
   def new(fields \\ []) do
-    fields = Keyword.put_new(fields, :door, GarageDoor.new())
     struct!(__MODULE__, fields)
   end
 
   def update_door(%__MODULE__{} = state, door) do
     Map.put(state, :door, door)
+  end
+
+  def add_event(%__MODULE__{} = state, event) do
+    events = Enum.concat(state.events, [event])
+    Map.put(state, :events, events)
+  end
+
+  def aggregate_events(%__MODULE__{door: door, events: events} = state) do
+    door = GarageDoor.new(access_codes: door.access_codes)
+
+    door =
+      Enum.reduce(events, door, fn event, acc ->
+        event.door_function.(acc, event.access_code)
+      end)
+
+    update_door(state, door)
   end
 end

@@ -39,4 +39,8 @@ defmodule Exosite.Core.GarageDoor do
   defp update_door(%__MODULE__{state: :closed} = door, :open) do
     Map.put(door, :state, :open)
   end
+
+  defp update_door(%__MODULE__{} = door, _action) do
+    door
+  end
 end

@@ -15,6 +15,16 @@ defmodule Exosite.Boundary.GarageDoorManager do
     GenServer.start_link(__MODULE__, State.new(fields), name: name)
   end
 
+  @doc """
+  Just get the state of the door
+  """
+  def door_state(name \\ __MODULE__, now) do
+    GenServer.call(name, {:door_state, now})
+  end
+
+  @doc """
+  Get the state of the whole Manager
+  """
   def get_state(name \\ __MODULE__) do
     GenServer.call(name, :get_state)
   end
@@ -27,11 +37,17 @@ defmodule Exosite.Boundary.GarageDoorManager do
     GenServer.call(name, {:remove_access_code, code, user})
   end
 
-  def open(name \\ __MODULE__, code, user, now \\ DateTime.utc_now()) do
+  def open(name \\ __MODULE__, opts) do
+    code = Keyword.fetch!(opts, :code)
+    user = Keyword.fetch!(opts, :user)
+    now = Keyword.get(opts, :now, DateTime.utc_now())
     GenServer.call(name, {:open, code, user, now})
   end
 
-  def close(name \\ __MODULE__, code, user, now \\ DateTime.utc_now()) do
+  def close(name \\ __MODULE__, opts) do
+    code = Keyword.fetch!(opts, :code)
+    user = Keyword.fetch!(opts, :user)
+    now = Keyword.get(opts, :now, DateTime.utc_now())
     GenServer.call(name, {:close, code, user, now})
   end
 
@@ -42,6 +58,14 @@ defmodule Exosite.Boundary.GarageDoorManager do
   @impl true
   def init(state) do
     {:ok, state}
+  end
+
+  @impl true
+  def handle_call({:door_state, now}, _from, state) do
+    state_duration = State.current_state_time(state, now)
+    last_user = State.last_event(state).user_id
+    door_state = {state.door.state, state_duration, last_user}
+    {:reply, door_state, state}
   end
 
   @impl true
@@ -131,5 +155,17 @@ defmodule Exosite.Boundary.GarageDoorManager.State do
       end)
 
     update_door(state, door)
+  end
+
+  def current_state_time(%__MODULE__{events: events}, now \\ DateTime.utc_now()) do
+    last_event_time = List.last(events).created_at
+
+    DateTime.diff(now, last_event_time)
+    |> Timex.Duration.from_seconds()
+    |> Timex.format_duration(:humanized)
+  end
+
+  def last_event(%__MODULE__{events: events}) do
+    List.last(events)
   end
 end

@@ -41,7 +41,7 @@ defmodule Exosite.Boundary.GarageDoorManagerTest do
       |> GarageDoor.add_access_code("abc", user)
 
     GarageDoorManager.new(door: door)
-    state = GarageDoorManager.open("abc", user)
+    state = GarageDoorManager.open(code: "abc", user: user)
     assert state.door.state == :open
   end
 
@@ -53,7 +53,7 @@ defmodule Exosite.Boundary.GarageDoorManagerTest do
       |> GarageDoor.add_access_code("abc", user)
 
     GarageDoorManager.new(door: door)
-    state = GarageDoorManager.close("abc", user)
+    state = GarageDoorManager.close(code: "abc", user: user)
     assert state.door.state == :closed
   end
 
@@ -62,12 +62,28 @@ defmodule Exosite.Boundary.GarageDoorManagerTest do
 
     GarageDoorManager.new()
     GarageDoorManager.add_access_code("abc", user)
-    GarageDoorManager.close("abc", user)
-    GarageDoorManager.open("abc", user)
-    GarageDoorManager.close("abc", user)
-    GarageDoorManager.close("foo", user)
-    GarageDoorManager.open("abc", user)
+    GarageDoorManager.close(code: "abc", user: user)
+    GarageDoorManager.open(code: "abc", user: user)
+    GarageDoorManager.close(code: "abc", user: user)
+    GarageDoorManager.close(code: "foo", user: user)
+    GarageDoorManager.open(code: "abc", user: user)
     assert GarageDoorManager.access_code_usage("abc") == 4
+  end
+
+  test "door_state/2 returns door state, time in state, and user who put in state" do
+    user = user_fixture()
+
+    GarageDoorManager.new()
+    GarageDoorManager.add_access_code("abc", user)
+
+    GarageDoorManager.open(
+      code: "abc",
+      user: user,
+      now: DateTime.new!(~D[2022-03-04], ~T[00:00:00])
+    )
+
+    assert GarageDoorManager.door_state(DateTime.new!(~D[2022-03-05], ~T[00:00:00])) ==
+             {:open, "1 day", user.id}
   end
 
   defp user_fixture(overrides \\ []) do

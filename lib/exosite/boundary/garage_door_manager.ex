@@ -11,6 +11,10 @@ defmodule Exosite.Boundary.GarageDoorManager do
     GenServer.call(name, :get_state)
   end
 
+  def add_access_code(name \\ __MODULE__, code, user) do
+    GenServer.call(name, {:add_access_code, code, user})
+  end
+
   @impl true
   def init(state) do
     {:ok, state}
@@ -18,6 +22,13 @@ defmodule Exosite.Boundary.GarageDoorManager do
 
   @impl true
   def handle_call(:get_state, _from, state) do
+    {:reply, state, state}
+  end
+
+  @impl true
+  def handle_call({:add_access_code, code, user}, _from, state) do
+    door = GarageDoor.add_access_code(state.door, code, user)
+    state = Map.put(state, :door, door)
     {:reply, state, state}
   end
 end

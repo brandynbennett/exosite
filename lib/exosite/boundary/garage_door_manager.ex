@@ -61,6 +61,12 @@ defmodule Exosite.Boundary.GarageDoorManager do
   end
 
   @impl true
+  def handle_call({:door_state, _now}, _from, %{events: []} = state) do
+    door_state = {state.door.state}
+    {:reply, door_state, state}
+  end
+
+  @impl true
   def handle_call({:door_state, now}, _from, state) do
     state_duration = State.current_state_time(state, now)
     last_user = State.last_event(state).user_id

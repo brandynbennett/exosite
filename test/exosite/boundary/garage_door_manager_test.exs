@@ -86,6 +86,16 @@ defmodule Exosite.Boundary.GarageDoorManagerTest do
              {:open, "1 day", user.id}
   end
 
+  test "door_state/2 returns door state no events" do
+    user = user_fixture()
+
+    GarageDoorManager.new()
+    GarageDoorManager.add_access_code("abc", user)
+
+    assert GarageDoorManager.door_state(DateTime.new!(~D[2022-03-05], ~T[00:00:00])) ==
+             {:closed}
+  end
+
   defp user_fixture(overrides \\ []) do
     User.new(Keyword.merge([id: "foo", name: "Jane", email: "jane@exosite.com"], overrides))
   end

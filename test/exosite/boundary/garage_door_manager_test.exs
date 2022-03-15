@@ -70,6 +70,14 @@ defmodule Exosite.Boundary.GarageDoorManagerTest do
     assert GarageDoorManager.access_code_usage("abc") == 4
   end
 
+  test "access_code_usage/2 no usage" do
+    user = user_fixture()
+
+    GarageDoorManager.new()
+    GarageDoorManager.add_access_code("abc", user)
+    assert GarageDoorManager.access_code_usage("abc") == 0
+  end
+
   test "door_state/2 returns door state, time in state, and user who put in state" do
     user = user_fixture()
 

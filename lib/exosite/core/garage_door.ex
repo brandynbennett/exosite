@@ -36,7 +36,7 @@ defmodule Exosite.Core.GarageDoor do
     Enum.any?(door.access_codes, &(&1.code == code))
   end
 
-  defp update_door(%__MODULE__{} = door, _event) do
-    door
+  defp update_door(%__MODULE__{state: :closed} = door, :open) do
+    Map.put(door, :state, :open)
   end
 end

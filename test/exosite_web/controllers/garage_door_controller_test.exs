@@ -15,4 +15,14 @@ defmodule ExositeWeb.PageControllerTest do
     conn = post(conn, "/api/remove-access-code", %{code: "abc", user_id: "foo"})
     assert json_response(conn, 200) == "ok"
   end
+
+  test "POST /api/open", %{conn: conn} do
+    conn = post(conn, "/api/open", %{code: "abc", user_id: "foo"})
+    assert json_response(conn, 200) == "ok"
+  end
+
+  test "POST /api/close", %{conn: conn} do
+    conn = post(conn, "/api/close", %{code: "abc", user_id: "foo"})
+    assert json_response(conn, 200) == "ok"
+  end
 end

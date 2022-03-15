@@ -35,6 +35,15 @@ defmodule Exosite.Core.GarageDoorTest do
              |> GarageDoor.remove_access_code("abc", user)
   end
 
+  test "open/2 ignores invalid code" do
+    user = user_fixture()
+
+    assert %GarageDoor{state: :closed} =
+             GarageDoor.new()
+             |> GarageDoor.add_access_code("abc", user)
+             |> GarageDoor.open("foo")
+  end
+
   defp user_fixture(overrides \\ []) do
     User.new(Keyword.merge([id: "foo", name: "Jane", email: "jane@exosite.com"], overrides))
   end

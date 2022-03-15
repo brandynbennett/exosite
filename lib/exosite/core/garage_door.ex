@@ -25,8 +25,16 @@ defmodule Exosite.Core.GarageDoor do
   end
 
   def open(%__MODULE__{} = door, code) do
+    maybe_update_door(door, code, :open)
+  end
+
+  def close(%__MODULE__{} = door, code) do
+    maybe_update_door(door, code, :close)
+  end
+
+  defp maybe_update_door(door, code, action) do
     if valid_code?(door, code) do
-      update_door(door, :open)
+      update_door(door, action)
     else
       door
     end
@@ -34,6 +42,10 @@ defmodule Exosite.Core.GarageDoor do
 
   defp valid_code?(%__MODULE__{} = door, code) do
     Enum.any?(door.access_codes, &(&1.code == code))
+  end
+
+  defp update_door(%__MODULE__{state: :open} = door, :close) do
+    Map.put(door, :state, :closed)
   end
 
   defp update_door(%__MODULE__{state: :closed} = door, :open) do

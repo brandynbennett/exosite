@@ -24,6 +24,8 @@ defmodule ExositeWeb.Router do
     pipe_through(:api)
 
     get("/door-state", GarageDoorController, :index)
+    post("/add-access-code", GarageDoorController, :add_access_code)
+    post("/remove-access-code", GarageDoorController, :remove_access_code)
   end
 
   # Other scopes may use custom stacks.

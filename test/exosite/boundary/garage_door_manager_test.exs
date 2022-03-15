@@ -45,6 +45,18 @@ defmodule Exosite.Boundary.GarageDoorManagerTest do
     assert state.door.state == :open
   end
 
+  test "close/2 closes the door" do
+    user = user_fixture()
+
+    door =
+      GarageDoor.new(state: :open)
+      |> GarageDoor.add_access_code("abc", user)
+
+    GarageDoorManager.new(door: door)
+    state = GarageDoorManager.close("abc", user)
+    assert state.door.state == :closed
+  end
+
   defp user_fixture(overrides \\ []) do
     User.new(Keyword.merge([id: "foo", name: "Jane", email: "jane@exosite.com"], overrides))
   end

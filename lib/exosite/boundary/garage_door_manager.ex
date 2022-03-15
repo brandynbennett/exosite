@@ -31,6 +31,10 @@ defmodule Exosite.Boundary.GarageDoorManager do
     GenServer.call(name, {:open, code, user, now})
   end
 
+  def close(name \\ __MODULE__, code, user, now \\ DateTime.utc_now()) do
+    GenServer.call(name, {:close, code, user, now})
+  end
+
   @impl true
   def init(state) do
     {:ok, state}
@@ -63,6 +67,23 @@ defmodule Exosite.Boundary.GarageDoorManager do
         access_code: code,
         created_at: now,
         door_function: &GarageDoor.open(&1, &2)
+      )
+
+    state =
+      State.add_event(state, event)
+      |> State.aggregate_events()
+
+    {:reply, state, state}
+  end
+
+  @impl true
+  def handle_call({:close, code, user, now}, _from, state) do
+    event =
+      GarageDoorEvent.new(
+        user_id: user.id,
+        access_code: code,
+        created_at: now,
+        door_function: &GarageDoor.close(&1, &2)
       )
 
     state =

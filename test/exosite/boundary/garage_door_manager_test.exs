@@ -57,6 +57,19 @@ defmodule Exosite.Boundary.GarageDoorManagerTest do
     assert state.door.state == :closed
   end
 
+  test "access_code_usage/2 counts access code usage" do
+    user = user_fixture()
+
+    GarageDoorManager.new()
+    GarageDoorManager.add_access_code("abc", user)
+    GarageDoorManager.close("abc", user)
+    GarageDoorManager.open("abc", user)
+    GarageDoorManager.close("abc", user)
+    GarageDoorManager.close("foo", user)
+    GarageDoorManager.open("abc", user)
+    assert GarageDoorManager.access_code_usage("abc") == 4
+  end
+
   defp user_fixture(overrides \\ []) do
     User.new(Keyword.merge([id: "foo", name: "Jane", email: "jane@exosite.com"], overrides))
   end

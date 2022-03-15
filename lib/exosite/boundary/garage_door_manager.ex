@@ -35,6 +35,10 @@ defmodule Exosite.Boundary.GarageDoorManager do
     GenServer.call(name, {:close, code, user, now})
   end
 
+  def access_code_usage(name \\ __MODULE__, code) do
+    GenServer.call(name, {:access_code_usage, code})
+  end
+
   @impl true
   def init(state) do
     {:ok, state}
@@ -91,6 +95,12 @@ defmodule Exosite.Boundary.GarageDoorManager do
       |> State.aggregate_events()
 
     {:reply, state, state}
+  end
+
+  @impl true
+  def handle_call({:access_code_usage, code}, _from, state) do
+    count = Enum.count(state.events, &(&1.access_code == code))
+    {:reply, count, state}
   end
 end
 

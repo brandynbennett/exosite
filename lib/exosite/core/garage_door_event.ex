@@ -2,5 +2,5 @@ defmodule Exosite.Core.GarageDoorEvent do
   @moduledoc """
   Events that a user does to a GarageDoor
   """
-  defstruct user: nil, access_code: nil
+  defstruct user: nil, access_code: nil, created_at: nil
 end

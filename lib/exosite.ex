@@ -1,9 +1,28 @@
 defmodule Exosite do
-  @moduledoc """
-  Exosite keeps the contexts that define your domain
-  and business logic.
+  alias Exosite.Boundary.GarageDoorManager
 
-  Contexts are also responsible for managing your data, regardless
-  if it comes from the database, an external API or others.
-  """
+  def add_access_code(code, user) do
+    GarageDoorManager.new()
+    GarageDoorManager.add_access_code(code, user)
+  end
+
+  def remove_access_code(code, user) do
+    GarageDoorManager.new()
+    GarageDoorManager.remove_access_code(code, user)
+  end
+
+  def open(code, user) do
+    GarageDoorManager.new()
+    GarageDoorManager.open(code: code, user: user)
+  end
+
+  def close(code, user) do
+    GarageDoorManager.new()
+    GarageDoorManager.close(code: code, user: user)
+  end
+
+  def door_state() do
+    GarageDoorManager.new()
+    GarageDoorManager.door_state(DateTime.utc_now())
+  end
 end
